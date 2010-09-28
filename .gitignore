@@ -1,4 +1,5 @@
 .DS_Store
 results.yml
-*swp
+*.swp
 /projects
+*.zip

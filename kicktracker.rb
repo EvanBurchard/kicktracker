@@ -26,7 +26,17 @@ end
 goal = counts[1][1].match(/of (.*) goal/)[1].gsub('$','').gsub(',','').to_i
 raised = counts[1][0].gsub(',','').gsub('$','').to_i
 
+what_you_get = page/'#what-you-get'
 
+reward_index = 0
+rewards = {} 
+  (what_you_get/'div'/'.reward').each do |reward|
+  rewards[("level_" + reward_index.to_s).to_sym] = {
+    :backing_amount => (reward/'h3')[0].content.delete(",").match(/\d+/)[0].to_i,
+    :description => (reward/'.desc'/'p')[0].content,
+    :backers => (reward/'.num-backers')[0].content.split("\n").select{|n| !n.nil? && !n.empty? }.compact[0].to_i}
+  reward_index = reward_index + 1
+end
 totals = {
   :goal_date => goal_date[0].to_s.strip,
   :time => DateTime.now.to_s,
@@ -35,11 +45,12 @@ totals = {
   :goal => goal,
   :cash_over_goal => -(goal - raised),
   :cash_under_goal => goal - raised,
-  :days_left => counts[2][0].to_i
+  :days_left => counts[2][0].to_i,
+  :rewards => rewards
 }
 
-puts url
-pp totals
+# puts url
+ pp totals
 storage << totals
 
 FileUtils.mkdir_p directory
